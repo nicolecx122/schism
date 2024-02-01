@@ -2082,8 +2082,8 @@
 !$OMP do
       do i=1,npa
         if(idry(i)==1.or.prho(kbp(i)+1,i)<-98.d0) cycle
-
-        tmp=sqrt(uu2(kbp(i)+1,i)**2.d0+vv2(kbp(i)+1,i)**2.d0)
+	uv2_bot_node(i)=uu2(kbp(i)+1,i)**2.d0+vv2(kbp(i)+1,i)**2.d0;
+        tmp=sqrt(uv2_bot_node(i))
         tau_bot_node(1,i)=prho(kbp(i)+1,i)*Cdp(i)*tmp*uu2(kbp(i)+1,i) !unit: kg/m/s^2 (Pa)
         tau_bot_node(2,i)=prho(kbp(i)+1,i)*Cdp(i)*tmp*vv2(kbp(i)+1,i)
         tau_bot_node(3,i)=prho(kbp(i)+1,i)*Cdp(i)*tmp*tmp

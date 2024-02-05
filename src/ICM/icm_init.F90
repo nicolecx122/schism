@@ -692,7 +692,7 @@ subroutine icm_init
   !ncai_pex
   PEXH2Sc=0.0; PEXH2St=0.0
   SED_PEXH2Sc=0.0; SED_PEXH2St=0.0
-  Hbedc=0.0;     Lbedc=0.0;      Atidec=0.0;     Ttidec=0.0;     Ctidec=0.0;     GAtidec=0.0;
+  Hbed=0.0;      Lbed=0.0;       Atide=0.0;      Ttide=0.0;      Ctide=0.0;      GAtide=0.0;
 
   !sed_flux
   SFA=0.0;       SED_BL=0.0;     ZD=0.0;         SED_B=0.0;      SED_LPOP=0.0;   SED_RPOP=0.0;   SED_LPON=0.0;  SED_RPON=0.0;

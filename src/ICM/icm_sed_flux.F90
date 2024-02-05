@@ -1632,7 +1632,7 @@ subroutine sed_calc(id)
   !************************************************************************
   if(iPEX>0.and.idry_e(id)/=1)then
     !calculate uv2 for elem #id
-    uv2_bot_elem=sum(uv2_bot_node(3,elnode(1:i34(id),id)))/i34(id)
+    uv2_bot_elem=sum(uv2_bot_node(elnode(1:i34(id),id)))/i34(id)
     bratio=Hbed(id)/ZD(id);
     if(bratio-0.34<1.e-8)then
       bmid=(bratio/0.34)**0.375

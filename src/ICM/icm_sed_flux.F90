@@ -244,8 +244,8 @@ subroutine read_icm_sed_param
   integer :: i,j,itmp,itmp1(1),itmp2(1,1)
   real(8) :: rtmp
   real(kind=iwp) :: rtmp1(1),rtmp2(1,1),xtmp,ytmp
-  real(kind=iwp) :: ttau_c_elem
-  real(kind=iwp),dimension(npa) :: ttau_c_elems
+  !real(kind=iwp) :: ttau_c_elem
+  !real(kind=iwp),dimension(npa) :: ttau_c_elems
   character(len=10) :: stmp
    
   !General parameters 
@@ -419,6 +419,12 @@ subroutine read_icm_sed_param
     depoWSL=rtmp
   endif !iERO
 
+  !porewater exchange
+  call get_param('icm_sed.in','iPEX',1,iPEX,rtmp,stmp)
+  if(iPEX>0) then
+    call get_param('icm_sed.in','Khydro',2,itmp,rtmp,stmp)
+    Khydro=rtmp
+  endif !iPEX
 
   !initial concentration
   call get_param('icm_sed.in','CTEMPI',2,itmp,rtmp,stmp)
@@ -605,27 +611,41 @@ subroutine read_icm_sed_param
   !erosion flux
   !read in spatial-varying critical shear stress
   if(iERO>0) then
-    open(31,file=in_dir(1:len_in_dir)//'tau_c_elem.gr3',status='old')
-    read(31,*); read(31,*)negb,npgb
-    if(negb/=ne_global.or.npgb/=np_global) call parallel_abort('Check tau_c_elem.gr3')
-    do i=1,np_global
-      read(31,*)ip,xtmp,ytmp,ttau_c_elem
-      if(ipgl(ip)%rank==myrank) then
-        ttau_c_elems(ipgl(ip)%id)=ttau_c_elem
-      endif !ipgl(ip)%rank
-    enddo !i
-    close(31)
-    do i=1,nea
-      do j=1,i34(i)
-        nd=elnode(j,i)
-        tau_c_elem(i)=tau_c_elem(i)+ttau_c_elems(nd)/i34(i)
-      enddo
-    enddo !i
+    !open(31,file=in_dir(1:len_in_dir)//'tau_c_elem.gr3',status='old')
+    !read(31,*); read(31,*)negb,npgb
+    !if(negb/=ne_global.or.npgb/=np_global) call parallel_abort('Check tau_c_elem.gr3')
+    !do i=1,np_global
+    !  read(31,*)ip,xtmp,ytmp,ttau_c_elem
+    !  if(ipgl(ip)%rank==myrank) then
+    !    ttau_c_elems(ipgl(ip)%id)=ttau_c_elem
+    !  endif !ipgl(ip)%rank
+    !enddo !i
+    !close(31)
+    !
+    !do i=1,nea
+    !  do j=1,i34(i)
+    !    nd=elnode(j,i)
+    !    tau_c_elem(i)=tau_c_elem(i)+ttau_c_elems(nd)/i34(i)
+    !  enddo
+    !enddo !i
+
+    call read_icm_param_2d('tau_c_elem',tau_c_elem,-999)
   endif !iERO
+
+  !porewater exchange 
+  if(iPEX>0) then
+    call read_icm_param_2d('Hbed',Hbed,-999)
+    call read_icm_param_2d('Lbed',Lbed,-999)
+    call read_icm_param_2d('Atide',Atide,-999)
+    call read_icm_param_2d('Ttide',Ttide,-999)
+    call read_icm_param_2d('Ctide',Ctide,-999)
+    call read_icm_param_2d('GAtide',GAtide,-999)
+  endif !iPEX
 
   !ncai_Balg
   !-----------------read in Balg patch flag-----------------
   if(iBalg==1) then
+    !did not call read_icm_param_2d because do check for each elem here
     open(31,file=in_dir(1:len_in_dir)//'patchBalg.prop',status='old')
     do i=1,ne_global
       read(31,*)j,rtmp
@@ -905,7 +925,7 @@ subroutine sed_calc(id)
 ! 1) calculate sediment flux
 ! 2) included sub-models: a)deposit feeder
 !-----------------------------------------------------------------------
-  use schism_glbl, only : dt,iwp,errmsg,ielg,tau_bot_node,nea,i34,elnode,idry_e
+  use schism_glbl, only : dt,iwp,errmsg,ielg,tau_bot_node,nea,i34,elnode,idry_e,uv2_bot_node
   use schism_msgp, only : myrank,parallel_abort
   use icm_mod, only : dtw,iLight,APC,ANC,ASCd,rKPO4p,rKSAp,AOC, &
                       &isav_icm,patchsav, & !ncai_sav
@@ -926,6 +946,7 @@ subroutine sed_calc(id)
   real(kind=iwp) :: rtmp,rtmp1,tmp1,rat,xlim1,xlim2,C0d,k12,k2 
   real(kind=iwp) :: flxs,flxr,flxl,flxp(3),flxu !flux rate of POM
   real(kind=iwp) :: tau_bot_elem,ero_elem
+  real(kind=iwp) :: bratio,bmid,uv2_bot_elem
 
   !if(iSteady==1) tintim=tintim+dtw
 
@@ -1566,7 +1587,7 @@ subroutine sed_calc(id)
   !************************************************************************
   if(iERO>0.and.idry_e(id)/=1)then
     !calculate bottom shear stress for elem #id
-    tau_bot_elem=sum(tau_bot_node(3,elnode(1:i34(i),i)))/i34(id)
+    tau_bot_elem=sum(tau_bot_node(3,elnode(1:i34(id),id)))/i34(id)
 
     !calculate erosion rate for elem #id
     if ((tau_bot_elem-tau_c_elem(id))>10.e-8)then
@@ -1606,6 +1627,31 @@ subroutine sed_calc(id)
   endif !iERO
   !************************************************************************
 
+  !************************************************************************
+  !porewater exchange
+  !************************************************************************
+  if(iPEX>0.and.idry_e(id)/=1)then
+    !calculate uv2 for elem #id
+    uv2_bot_elem=sum(uv2_bot_node(3,elnode(1:i34(id),id)))/i34(id)
+    bratio=Hbed(id)/ZD(id);
+    if(bratio-0.34<1.e-8)then
+      bmid=(bratio/0.34)**0.375
+    else
+      bmid=(bratio/0.34)**1.5
+    endif !bratio
+    SED_PEXH2Sc(id)=HST2*2*Khydro*0.014*uv2_bot_elem*bmid/Lbed(id);
+    SED_PEXH2St(id)=HST2*2*0.7071*Atide(id)*Khydro*(1-GAtide(id))/(3.1415926*Ctide(id)*Ttide(id))**0.5
+
+    if(iPEX==1)then !current-bedform pumping only
+      SED_PEXH2St(id)=0
+    elseif(iPEX==2)then !tidal pumping only
+      SED_PEXH2Sc(id)=0
+    endif !iPEX
+
+    !minus PEX in sediment for mass balance
+    HST2=max(1.0e-10_iwp,HST2-(SED_PEXH2Sc(id)+SED_PEXH2St(id))*dtw/HSED(id))
+  endif !iPEX
+  !************************************************************************
 
   !update sediment concentration
   NH41TM1S(id)  = NH41        !dissolved NH4 in 1st layer
@@ -1935,10 +1981,10 @@ subroutine link_sed_input(id,nv)
 !  SFA(id)=area(id)
 
   !total depth 
-  ZD(id)=max(dpe(id)+sum(eta2(elnode(1:i34(id),id)))/i34(id),0.d0) 
+  ZD(id)=sum(dep(1:nv)) !max(dpe(id)+sum(eta2(elnode(1:i34(id),id)))/i34(id),0.d0);dpe takes the shallowest node in one elem 
 
-  SED_BL=dep(nv) 
-  SED_T(id)   =Temp(nv) 
+  SED_BL(id)=dep(nv) 
+  SED_T(id)=Temp(nv) 
   SED_SALT(id)=Sal(nv)
   SED_B(id,1) =PB1(nv,1)
   SED_B(id,2) =PB2(nv,1)
@@ -1969,8 +2015,8 @@ subroutine link_sed_output(id)
 !sediment flux
 !---------------------------------------------------------------------------------------
   use schism_glbl, only : idry_e
-  use icm_mod, only : BnDOC,BnNH4,BnNO3,BnPO4t,BnDO,BnSAt,BnCOD,EROH2S,EROLPOC,ERORPOC
-  use icm_sed_mod, only : SED_BENDOC,SED_BENNH4,SED_BENNO3,SED_BENPO4,SED_BENCOD,SED_BENDO,SED_BENSA,iERO,SED_EROH2S,SED_EROLPOC,SED_ERORPOC,PIE1S,m1
+  use icm_mod, only : BnDOC,BnNH4,BnNO3,BnPO4t,BnDO,BnSAt,BnCOD,EROH2S,EROLPOC,ERORPOC,PEXH2Sc,PEXH2St
+  use icm_sed_mod, only : SED_BENDOC,SED_BENNH4,SED_BENNO3,SED_BENPO4,SED_BENCOD,SED_BENDO,SED_BENSA,iERO,SED_EROH2S,SED_EROLPOC,SED_ERORPOC,PIE1S,m1,iPEX,SED_PEXH2Sc,SED_PEXH2St
   implicit none
   integer, intent(in) :: id
 
@@ -1990,6 +2036,12 @@ subroutine link_sed_output(id)
     EROLPOC(id)=SED_EROLPOC(id)
     ERORPOC(id)=SED_ERORPOC(id)
   endif !iERO
+
+  !porewater exchange
+  if(iPEX>0.and.idry_e(id)/=1)then
+    PEXH2Sc(id)=SED_PEXH2Sc(id)/2 !S to 0.5*O2
+    PEXH2St(id)=SED_PEXH2St(id)/2
+  endif !iPEX
 
 end subroutine link_sed_output
 

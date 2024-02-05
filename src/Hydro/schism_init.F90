@@ -418,7 +418,7 @@
       !order). Flags for modules other than hydro are only used inside USE_*
       if(iorder==0) then
         allocate(iof_hydro(40),iof_wwm(30),iof_gen(max(1,ntracer_gen)),iof_age(max(1,ntracer_age)),level_age(ntracer_age/2), &
-     &iof_sed(3*sed_class+20),iof_eco(max(1,eco_class)),iof_icm(220),iof_cos(20),iof_fib(5), &
+     &iof_sed(3*sed_class+20),iof_eco(max(1,eco_class)),iof_icm(230),iof_cos(20),iof_fib(5), &
      &iof_sed2d(14),iof_ice(10),iof_ana(20),iof_marsh(2),iof_dvd(max(1,ntrs(12))),stat=istat)
         if(istat/=0) call parallel_abort('INIT: iof failure')
         !Global output on/off flags
@@ -1327,7 +1327,7 @@
 !     All other arrays
 !      allocate(sdbt(2+ntracers,nvrt,nsa), & !webt(nvrt,nea), bubt(2,nea), & 
        allocate(windx1(npa),windy1(npa),windx2(npa),windy2(npa),windx(npa),windy(npa), &
-         &  tau(2,npa),tau_bot_node(3,npa),iadv(npa),pr1(npa),airt1(npa),shum1(npa), &
+         &  tau(2,npa),tau_bot_node(3,npa),iadv(npa),pr1(npa),airt1(npa),shum1(npa),uv2_bot_node(npa), &
          &  pr2(npa),airt2(npa),shum2(npa),pr(npa),sflux(npa),srad(npa),tauxz(npa),tauyz(npa), &
          &  fluxsu(npa),fluxlu(npa),hradu(npa),hradd(npa),cori(nsa),Cd(nsa), &
          &  Cdp(npa),rmanning(npa),rough_p(npa),dfv(nvrt,npa),elev_nudge(npa),uv_nudge(npa), &
@@ -1608,6 +1608,7 @@
       iwsett=0; wsett=0.d0 !settling vel.
       rough_p=1.d-4 !>0 for SED
       tau_bot_node=0.d0
+      uv2_bot_node=0.d0
       uu2 = 0.0_rkind
       vv2 = 0.0_rkind
       ww2 = 0.0_rkind

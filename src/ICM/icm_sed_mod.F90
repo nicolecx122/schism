@@ -124,6 +124,12 @@ module icm_sed_mod
   real(kind=iwp),save :: depofracR,depofracL,depoWSR,depoWSL
   integer, save :: iERO,iDEPO
 
+  !porewater exchange
+  real(kind=iwp),save,allocatable,dimension(:) :: SED_PEXH2Sc,SED_PEXH2St !nea
+  integer, save :: iPEX
+  real(kind=iwp),save :: Khydro 
+  real(kind=iwp),save,allocatable,dimension(:) :: Hbed,Lbed,Atide,Ttide,Ctide,GAtide !nea 
+
   !bottom Light (nea)
   real(kind=iwp),save,allocatable,dimension(:) :: sbLight
   

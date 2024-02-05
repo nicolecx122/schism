@@ -443,7 +443,7 @@ module schism_glbl
                                   !WARNING: airt[12] are in C not K. The
                                   !original air T in sflux_air*.nc is in K but
                                   !get_wind() converts it to C
-                                  &tau(:,:),tau_bot_node(:,:),pr1(:),airt1(:), &
+                                  &tau(:,:),tau_bot_node(:,:),pr1(:),airt1(:),uv2_bot_node(:), &
                                   &shum1(:),pr2(:),airt2(:),shum2(:),pr(:), &
                                   &sflux(:),srad(:),tauxz(:),tauyz(:),fluxsu(:), &
                                   &fluxlu(:),hradu(:),hradd(:),cori(:), & !chi(:)

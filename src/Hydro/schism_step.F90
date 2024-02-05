@@ -48,6 +48,7 @@
                          &tlfsav,tstsav,trtsav,hcansav,lfsav,stsav,rtsav,isav_icm, & !ncai_sav
                          &tlfveg,tstveg,trtveg,hcanveg,iveg_icm, & !ncai_veg
                          &EROH2S,EROLPOC,ERORPOC, & !ncai_erosion
+                         &PEXH2Sc,PEXH2St, & !ncai_PEX
                          &GP,GPT,netGP, &
                          &rFI1,rFN1,rFP1,rFI2,rFN2,rFP2,rFI3,rFN3,rFP3,rFS,rFSal, &
                          &disoRPOC,disoLPOC,HRDOC,DenitDOC, &
@@ -2086,7 +2087,7 @@
         tmp=sqrt(uv2_bot_node(i))
         tau_bot_node(1,i)=prho(kbp(i)+1,i)*Cdp(i)*tmp*uu2(kbp(i)+1,i) !unit: kg/m/s^2 (Pa)
         tau_bot_node(2,i)=prho(kbp(i)+1,i)*Cdp(i)*tmp*vv2(kbp(i)+1,i)
-        tau_bot_node(3,i)=prho(kbp(i)+1,i)*Cdp(i)*tmp*tmp
+        tau_bot_node(3,i)=prho(kbp(i)+1,i)*Cdp(i)*uv2_bot_node(i)
       enddo !i
 !$OMP end do
 
@@ -8637,8 +8638,14 @@
         if(iof_icm(192)==1.and.iBalg==1) call writeout_nc(id_out_var(noutput+196), &
      &'ICM_FPBalg',4,1,nea,dble(FPBalg))
 
-        noutput=noutput+192
-        icount=192 !offset
+        !porewater exchange
+        if(iof_icm(193)==1) call writeout_nc(id_out_var(noutput+197), &
+     &'ICM_PEXH2Sc',4,1,nea,dble(PEXH2Sc))
+        if(iof_icm(194)==1) call writeout_nc(id_out_var(noutput+198), &
+     &'ICM_PEXH2St',4,1,nea,dble(PEXH2St))
+
+        noutput=noutput+194
+        icount=194 !offset
 
         do i=1,ntrs(7)
           write(it_char,'(i72)')i

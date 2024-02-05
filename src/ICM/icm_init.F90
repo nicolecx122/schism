@@ -53,6 +53,7 @@ subroutine icm_init
     & tlfveg(nea,3),tstveg(nea,3),trtveg(nea,3),hcanveg(nea,3), &!ncai_veg
     & tthcan(nea),ttdens(nea), &!ncai_sav + ncai_veg
     & EROH2S(nea),EROLPOC(nea),ERORPOC(nea), &!erosion
+    & PEXH2Sc(nea),PEXH2St(nea), & !porewater exchange
     & reg_PO4(nea),reg_GP(nea),reg_WS(nea),reg_PR(nea),reg_KC(nea),stat=istat)  !ncai_region
   if(istat/=0) call parallel_abort('Failed in alloc. icm_mod variables')
 
@@ -625,7 +626,9 @@ subroutine icm_init
   !----------------------------------------------------------------
   allocate(SFA(nea),SED_BL(nea),ZD(nea),SED_B(nea,3),SED_LPOP(nea),SED_RPOP(nea),SED_LPON(nea),SED_RPON(nea), &
       & tau_c_elem(nea), &!ncai_erosion
-      & SED_EROH2S(nea),SED_EROLPOC(nea),SED_ERORPOC(nea), & 
+      & SED_EROH2S(nea),SED_EROLPOC(nea),SED_ERORPOC(nea), &
+      & SED_PEXH2Sc(nea),SED_PEXH2St(nea), &
+      & Hbed(nea),Lbed(nea),Atide(nea),Ttide(nea),Ctide(nea),GAtide(nea), & 
       & SED_LPOC(nea),SED_RPOC(nea),SED_TSS(nea),SED_SU(nea),SED_PO4(nea),SED_NH4(nea),SED_NO3(nea), &
       & SED_SA(nea),SED_DO(nea),SED_COD(nea),SED_SALT(nea),SED_T(nea), &
       & SSI(nea), AG3CFL(nea),AG3NFL(nea),AG3PFL(nea),ASDTMP(nea), WSSBNET(nea),WSLBNET(nea),WSRBNET(nea), &
@@ -685,6 +688,11 @@ subroutine icm_init
   tau_c_elem=0.0
   EROH2S=0.0; EROLPOC=0.0; ERORPOC=0.0
   SED_EROH2S=0.0; SED_EROLPOC=0.0; SED_ERORPOC=0.0
+
+  !ncai_pex
+  PEXH2Sc=0.0; PEXH2St=0.0
+  SED_PEXH2Sc=0.0; SED_PEXH2St=0.0
+  Hbedc=0.0;     Lbedc=0.0;      Atidec=0.0;     Ttidec=0.0;     Ctidec=0.0;     GAtidec=0.0;
 
   !sed_flux
   SFA=0.0;       SED_BL=0.0;     ZD=0.0;         SED_B=0.0;      SED_LPOP=0.0;   SED_RPOP=0.0;   SED_LPON=0.0;  SED_RPON=0.0;

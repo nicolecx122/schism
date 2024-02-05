@@ -145,6 +145,16 @@ depofracL=0.01
 depoWSR=10
 depoWSL=10
 
+!------------------------------------------------------
+!porewater exchange
+!iPEX >0: turn on porewater exchange
+!iPEX =1: turn on current-bedform pumping
+!iPEX =2: turn on tidal pumping
+!iPEX =3: turn on both current-bedform pumping and tidal pumping
+!-----------------------------------------------------------------------
+iPEX=0
+Khydro=1e-5; !hydraulic conductivity, in the order of 10-5 m/s
+
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 !initial concentration
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

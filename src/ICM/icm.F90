@@ -3154,9 +3154,9 @@ subroutine calkwq(id,nv,ure,it)
     !rKCOD=(DOO(k,1)/(rKHCOD+DOO(k,1)))*rKCD*exp(rKTCOD*(Temp(k)-TRCOD))
     a=-rKCOD
     b=nCOD/dep(k)+WPCOD+WCOD
-    !erosion flux
+    !erosion flux + PEX 
     if(k==nv) then
-      b=b+EROH2S(id)/dep(k)
+      b=b+EROH2S(id)/dep(k)+(PEXH2Sc(id)+PEXH2St(id))/dep(k)
     endif !k==nv
     COD(k,2)=((1.0+a*dtw2)*COD(k,1)+b*dtw)/(1.0-a*dtw2)
     COD(k,1)=0.5*(COD(k,1)+COD(k,2))

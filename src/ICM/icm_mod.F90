@@ -235,6 +235,9 @@ module icm_mod
   !erosion
   real(kind=iwp),save,allocatable,dimension(:) :: EROH2S, EROLPOC,ERORPOC !nea
 
+  !porewater exchange
+  real(kind=iwp),save,allocatable,dimension(:) :: PEXH2Sc, PEXH2St !nea
+
   !settling
   !integer,save :: iReg_WS,iWS
   integer,save,allocatable :: reg_WS(:) !nea

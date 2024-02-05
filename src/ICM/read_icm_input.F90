@@ -189,7 +189,8 @@ subroutine read_icm_param2
   use schism_msgp, only : myrank, parallel_abort
   use icm_mod
   use misc_modules
-  use icm_sed_mod, only : iBalg,patchBalg
+  use icm_sed_mod, only : iERO, tau_c_elem, &
+                   & iPEX,Hbed,Lbed,Atide,Ttide,Ctide,GAtide 
   implicit none
  
   !local variables
@@ -311,6 +312,22 @@ subroutine read_icm_param2
     call get_param('icm.in','PC2TSS',2,itmp,tPC2TSS,stmp)
     call read_icm_param_2d('PC2TSS',PC2TSS,tPC2TSS)
   endif
+
+  !erosion flux
+  !read in spatial-varying critical shear stress
+  if(iERO>0) then
+    call read_icm_param_2d('tau_c_elem',tau_c_elem,-999)
+  endif !iERO
+
+  !porewater exchange 
+  if(iPEX>0) then
+    call read_icm_param_2d('Hbed',Hbed,-999)
+    call read_icm_param_2d('Lbed',Lbed,-999)
+    call read_icm_param_2d('Atide',Atide,-999)
+    call read_icm_param_2d('Ttide',Ttide,-999)
+    call read_icm_param_2d('Ctide',Ctide,-999)
+    call read_icm_param_2d('GAtide',GAtide,-999)
+  endif !iPEX
 
   !for pH module
 #ifdef ICM_PH

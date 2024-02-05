@@ -608,40 +608,40 @@ subroutine read_icm_sed_param
     call parallel_abort(errmsg)
   endif !ispvarlr
  
-  !erosion flux
-  !read in spatial-varying critical shear stress
-  if(iERO>0) then
-    !open(31,file=in_dir(1:len_in_dir)//'tau_c_elem.gr3',status='old')
-    !read(31,*); read(31,*)negb,npgb
-    !if(negb/=ne_global.or.npgb/=np_global) call parallel_abort('Check tau_c_elem.gr3')
-    !do i=1,np_global
-    !  read(31,*)ip,xtmp,ytmp,ttau_c_elem
-    !  if(ipgl(ip)%rank==myrank) then
-    !    ttau_c_elems(ipgl(ip)%id)=ttau_c_elem
-    !  endif !ipgl(ip)%rank
-    !enddo !i
-    !close(31)
-    !
-    !do i=1,nea
-    !  do j=1,i34(i)
-    !    nd=elnode(j,i)
-    !    tau_c_elem(i)=tau_c_elem(i)+ttau_c_elems(nd)/i34(i)
-    !  enddo
-    !enddo !i
-
-    call read_icm_param_2d('tau_c_elem',tau_c_elem,-999)
-  endif !iERO
-
-  !porewater exchange 
-  if(iPEX>0) then
-    call read_icm_param_2d('Hbed',Hbed,-999)
-    call read_icm_param_2d('Lbed',Lbed,-999)
-    call read_icm_param_2d('Atide',Atide,-999)
-    call read_icm_param_2d('Ttide',Ttide,-999)
-    call read_icm_param_2d('Ctide',Ctide,-999)
-    call read_icm_param_2d('GAtide',GAtide,-999)
-  endif !iPEX
-
+! !erosion flux
+! !read in spatial-varying critical shear stress
+! if(iERO>0) then
+!   !open(31,file=in_dir(1:len_in_dir)//'tau_c_elem.gr3',status='old')
+!   !read(31,*); read(31,*)negb,npgb
+!   !if(negb/=ne_global.or.npgb/=np_global) call parallel_abort('Check tau_c_elem.gr3')
+!   !do i=1,np_global
+!   !  read(31,*)ip,xtmp,ytmp,ttau_c_elem
+!   !  if(ipgl(ip)%rank==myrank) then
+!   !    ttau_c_elems(ipgl(ip)%id)=ttau_c_elem
+!   !  endif !ipgl(ip)%rank
+!   !enddo !i
+!   !close(31)
+!   !
+!   !do i=1,nea
+!   !  do j=1,i34(i)
+!   !    nd=elnode(j,i)
+!   !    tau_c_elem(i)=tau_c_elem(i)+ttau_c_elems(nd)/i34(i)
+!   !  enddo
+!   !enddo !i
+!
+!   call read_icm_param_2d('tau_c_elem',tau_c_elem,-999)
+! endif !iERO
+!
+! !porewater exchange 
+! if(iPEX>0) then
+!   call read_icm_param_2d('Hbed',Hbed,-999)
+!   call read_icm_param_2d('Lbed',Lbed,-999)
+!   call read_icm_param_2d('Atide',Atide,-999)
+!   call read_icm_param_2d('Ttide',Ttide,-999)
+!   call read_icm_param_2d('Ctide',Ctide,-999)
+!   call read_icm_param_2d('GAtide',GAtide,-999)
+! endif !iPEX
+ 
   !ncai_Balg
   !-----------------read in Balg patch flag-----------------
   if(iBalg==1) then

@@ -1624,6 +1624,13 @@ subroutine sed_calc(id)
     HST2=max(1.0e-10_iwp,HST2-SED_EROH2S(id)*dtw/HSED(id))
     POC1=max(1.0e-10_iwp,POC1-SED_EROLPOC(id)*dtw/HSED(id))
     POC2=max(1.0e-10_iwp,POC2-SED_ERORPOC(id)*dtw/HSED(id))
+
+!N_check
+    if(HST2/=HST2.or.POC1/=POC1.or.POC2/=POC2)then
+      write(errmsg,*)'N_check 1: ',HST2,POC1,POC2,EROH2S(id),SED_EROLPOC(id),SED_ERORPOC(id),ero_elem,erodiso,m1,PIE1S,depofracL,depofracR
+      call parallel_abort(errmsg)
+    endif
+
   endif !iERO
   !************************************************************************
 
@@ -1650,6 +1657,12 @@ subroutine sed_calc(id)
 
     !minus PEX in sediment for mass balance
     HST2=max(1.0e-10_iwp,HST2-(SED_PEXH2Sc(id)+SED_PEXH2St(id))*dtw/HSED(id))
+
+!N_check
+    if(HST2/=HST2)then
+      write(errmsg,*)'N_check 2: ',HST2,SED_PEXH2Sc(id),SED_PEXH2St(id),Khydro,uv2_bot_elem,bmid,Lbed(id),Atide(id),Khydro,GAtide(id),Ctide(id),Ttide(id)
+      call parallel_abort(errmsg)
+    endif
   endif !iPEX
   !************************************************************************
 
@@ -1881,6 +1894,12 @@ subroutine sedsod(id)
     k2=0.0
     call sed_eq(5,HS1,HS2,HST1,HST2,HST2TM1,pie1,pie2,m1,m2,stc,KL12,W12,W2,H2,dtw,C0d,j1,j2,k12,k2)
     JHS=stc*(HS1-HS0)
+
+!N_check
+    if(HS1/=HS1.or.HS2/=HS2.or.HST1/=HST1.or.HST2/=HST2.or.HST2TM/=HST2TM)then
+      write(errmsg,*)'N_check 3: ',HS1,HS2,HST1,HST2,HST2TM1,O20,XJC
+      call parallel_abort(errmsg)
+    endif
 
     !oxygen consumption
     CSODHS=k12*HS1/stc

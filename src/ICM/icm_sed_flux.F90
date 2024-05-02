@@ -1627,7 +1627,7 @@ subroutine sed_calc(id)
 
 !N_check
     if(HST2/=HST2.or.POC1/=POC1.or.POC2/=POC2)then
-      write(errmsg,*)'N_check 1: ',HST2,POC1,POC2,EROH2S(id),SED_EROLPOC(id),SED_ERORPOC(id),ero_elem,erodiso,m1,PIE1S,depofracL,depofracR
+      write(errmsg,*)'N_check 1: ',HST2,POC1,POC2,SED_EROH2S(id),SED_EROLPOC(id),SED_ERORPOC(id),ero_elem,erodiso,m1,PIE1S,depofracL,depofracR
       call parallel_abort(errmsg)
     endif
 
@@ -1896,7 +1896,7 @@ subroutine sedsod(id)
     JHS=stc*(HS1-HS0)
 
 !N_check
-    if(HS1/=HS1.or.HS2/=HS2.or.HST1/=HST1.or.HST2/=HST2.or.HST2TM/=HST2TM)then
+    if(HS1/=HS1.or.HS2/=HS2.or.HST1/=HST1.or.HST2/=HST2.or.HST2TM1/=HST2TM1)then
       write(errmsg,*)'N_check 3: ',HS1,HS2,HST1,HST2,HST2TM1,O20,XJC
       call parallel_abort(errmsg)
     endif

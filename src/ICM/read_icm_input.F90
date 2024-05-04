@@ -1312,6 +1312,10 @@ subroutine read_icm_param_2d(varname,pvar,pvalue)
   integer :: i,j,k,negb,npgb,ip,ie,nd
   real(kind=iwp) :: xtmp,ytmp,rtmp
   real(kind=iwp),dimension(npa) :: tvar
+
+!!NN_check
+!write(95,*)'read_icm_param_2d: ',varname,pvar,pvalue
+
   
   !read spatailly varying parameter values
   if(int(pvalue)==-999) then  !*.gr3
@@ -1325,6 +1329,9 @@ subroutine read_icm_param_2d(varname,pvar,pvalue)
       endif
     enddo
     close(31) 
+
+!!NN_check
+!write(96,*)'Check: '//trim(adjustl(varname))//'.gr3',negb,npgb,rtmp
 
     !interp from node to element
     pvar=0.0

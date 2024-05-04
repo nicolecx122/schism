@@ -244,10 +244,11 @@ subroutine read_icm_sed_param
   integer :: i,j,itmp,itmp1(1),itmp2(1,1)
   real(8) :: rtmp
   real(kind=iwp) :: rtmp1(1),rtmp2(1,1),xtmp,ytmp
-  !real(kind=iwp) :: ttau_c_elem
-  !real(kind=iwp),dimension(npa) :: ttau_c_elems
+  real(kind=iwp) :: ttau_c_elem
+  real(kind=iwp),dimension(npa) :: ttau_c_elems
   character(len=10) :: stmp
-   
+  real(kind=iwp) :: ptmp=-999
+
   !General parameters 
   call get_param('icm_sed.in','HSEDALL',2,itmp,rtmp,stmp)
   HSEDALL=rtmp
@@ -608,39 +609,39 @@ subroutine read_icm_sed_param
     call parallel_abort(errmsg)
   endif !ispvarlr
  
- !erosion flux
- !read in spatial-varying critical shear stress
- if(iERO>0) then
-   !open(31,file=in_dir(1:len_in_dir)//'tau_c_elem.gr3',status='old')
-   !read(31,*); read(31,*)negb,npgb
-   !if(negb/=ne_global.or.npgb/=np_global) call parallel_abort('Check tau_c_elem.gr3')
-   !do i=1,np_global
-   !  read(31,*)ip,xtmp,ytmp,ttau_c_elem
-   !  if(ipgl(ip)%rank==myrank) then
-   !    ttau_c_elems(ipgl(ip)%id)=ttau_c_elem
-   !  endif !ipgl(ip)%rank
-   !enddo !i
-   !close(31)
-   !
-   !do i=1,nea
-   !  do j=1,i34(i)
-   !    nd=elnode(j,i)
-   !    tau_c_elem(i)=tau_c_elem(i)+ttau_c_elems(nd)/i34(i)
-   !  enddo
-   !enddo !i
+  !erosion flux
+  !read in spatial-varying critical shear stress
+  if(iERO>0) then
+    open(31,file=in_dir(1:len_in_dir)//'tau_c_elem.gr3',status='old')
+    read(31,*); read(31,*)negb,npgb
+    if(negb/=ne_global.or.npgb/=np_global) call parallel_abort('Check tau_c_elem.gr3')
+    do i=1,np_global
+      read(31,*)ip,xtmp,ytmp,ttau_c_elem
+      if(ipgl(ip)%rank==myrank) then
+        ttau_c_elems(ipgl(ip)%id)=ttau_c_elem
+      endif !ipgl(ip)%rank
+    enddo !i
+    close(31)
+    
+    do i=1,nea
+      do j=1,i34(i)
+        nd=elnode(j,i)
+        tau_c_elem(i)=tau_c_elem(i)+ttau_c_elems(nd)/i34(i)
+      enddo
+    enddo !i
 
-   call read_icm_param_2d('tau_c_elem',tau_c_elem,-999)
- endif !iERO
+    !call read_icm_param_2d('tau_c_elem',tau_c_elem,ptmp)
+  endif !iERO
 
- !porewater exchange 
- if(iPEX>0) then
-   call read_icm_param_2d('Hbed',Hbed,-999)
-   call read_icm_param_2d('Lbed',Lbed,-999)
-   call read_icm_param_2d('Atide',Atide,-999)
-   call read_icm_param_2d('Ttide',Ttide,-999)
-   call read_icm_param_2d('Ctide',Ctide,-999)
-   call read_icm_param_2d('GAtide',GAtide,-999)
- endif !iPEX
+  !porewater exchange 
+  if(iPEX>0) then
+    call read_icm_param_2d('Hbed',Hbed,ptmp)
+    call read_icm_param_2d('Lbed',Lbed,ptmp)
+    call read_icm_param_2d('Atide',Atide,ptmp)
+    call read_icm_param_2d('Ttide',Ttide,ptmp)
+    call read_icm_param_2d('Ctide',Ctide,ptmp)
+    call read_icm_param_2d('GAtide',GAtide,ptmp)
+  endif !iPEX
  
   !ncai_Balg
   !-----------------read in Balg patch flag-----------------
@@ -1625,11 +1626,15 @@ subroutine sed_calc(id)
     POC1=max(1.0e-10_iwp,POC1-SED_EROLPOC(id)*dtw/HSED(id))
     POC2=max(1.0e-10_iwp,POC2-SED_ERORPOC(id)*dtw/HSED(id))
 
-!N_check
-    if(HST2/=HST2.or.POC1/=POC1.or.POC2/=POC2)then
-      write(errmsg,*)'N_check 1: ',HST2,POC1,POC2,SED_EROH2S(id),SED_EROLPOC(id),SED_ERORPOC(id),ero_elem,erodiso,m1,PIE1S,depofracL,depofracR
-      call parallel_abort(errmsg)
-    endif
+!!N_check
+!    if(HST2/=HST2.or.POC1/=POC1.or.POC2/=POC2)then
+!      write(errmsg,*)'N_check 1: ',HST2,POC1,POC2,SED_EROH2S(id),SED_EROLPOC(id),SED_ERORPOC(id),ero_elem,erodiso,m1,PIE1S,depofracL,depofracR
+!      call parallel_abort(errmsg)
+!    endif
+!
+!!NN_check
+!write(98,*)'ERO at icm_sed_flux.F90:',id,SED_EROH2S(id),HST2,erorate,eroporo,erofrac,tau_bot_elem,tau_c_elem(id),tau_bot_node(3,elnode(1,id)),i34(id)
+
 
   endif !iERO
   !************************************************************************
@@ -1658,11 +1663,14 @@ subroutine sed_calc(id)
     !minus PEX in sediment for mass balance
     HST2=max(1.0e-10_iwp,HST2-(SED_PEXH2Sc(id)+SED_PEXH2St(id))*dtw/HSED(id))
 
-!N_check
-    if(HST2/=HST2)then
-      write(errmsg,*)'N_check 2: ',HST2,SED_PEXH2Sc(id),SED_PEXH2St(id),Khydro,uv2_bot_elem,bmid,Lbed(id),Atide(id),Khydro,GAtide(id),Ctide(id),Ttide(id)
-      call parallel_abort(errmsg)
-    endif
+!!N_check
+!    if(HST2/=HST2)then
+!      write(errmsg,*)'N_check 2: ',HST2,SED_PEXH2Sc(id),SED_PEXH2St(id),Khydro,uv2_bot_elem,bmid,Lbed(id),Atide(id),Khydro,GAtide(id),Ctide(id),Ttide(id)
+!      call parallel_abort(errmsg)
+!    endif
+!!NN_check
+!write(97,*)'PEX at icm_sed_flux.F90:',id,SED_PEXH2Sc(id),SED_PEXH2St(id),HST2,Khydro,uv2_bot_elem,bmid,Lbed(id),Atide(id),Khydro,GAtide(id),Ctide(id),Ttide(id)
+
   endif !iPEX
   !************************************************************************
 
@@ -1895,11 +1903,11 @@ subroutine sedsod(id)
     call sed_eq(5,HS1,HS2,HST1,HST2,HST2TM1,pie1,pie2,m1,m2,stc,KL12,W12,W2,H2,dtw,C0d,j1,j2,k12,k2)
     JHS=stc*(HS1-HS0)
 
-!N_check
-    if(HS1/=HS1.or.HS2/=HS2.or.HST1/=HST1.or.HST2/=HST2.or.HST2TM1/=HST2TM1)then
-      write(errmsg,*)'N_check 3: ',HS1,HS2,HST1,HST2,HST2TM1,O20,XJC
-      call parallel_abort(errmsg)
-    endif
+!!N_check
+!    if(HS1/=HS1.or.HS2/=HS2.or.HST1/=HST1.or.HST2/=HST2.or.HST2TM1/=HST2TM1)then
+!      write(errmsg,*)'N_check 3: ',HS1,HS2,HST1,HST2,HST2TM1,O20,XJC
+!      call parallel_abort(errmsg)
+!    endif
 
     !oxygen consumption
     CSODHS=k12*HS1/stc

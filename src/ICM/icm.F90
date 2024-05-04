@@ -257,7 +257,7 @@ subroutine link_icm(imode,id,nv)
       !nan check 
       do i=1,(21+4*iPh)
         if(.not.(tr_el(i-1+irange_tr(1,7),k,id)>0.d0.or.tr_el(i-1+irange_tr(1,7),k,id)<=0.d0)) then
-          write(errmsg,*)'nan found in ICM:',tr_el(i-1+irange_tr(1,7),k,id),ielg(id),i,k
+          write(errmsg,*)'nan found in ICM:',tr_el(i-1+irange_tr(1,7),k,id),ielg(id),i,k,idry_e(id)
           call parallel_abort(errmsg)
         endif
       enddo
@@ -336,32 +336,32 @@ subroutine link_icm(imode,id,nv)
         !nan check
         do i=1,(21+4*iPh)
           if(tr_el(i-1+irange_tr(1,7),k,id)/=tr_el(i-1+irange_tr(1,7),k,id)) then
-            write(errmsg,*)'nan found in ICM(2) : ',tr_el(i-1+irange_tr(1,7),k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(2) : ',tr_el(i-1+irange_tr(1,7),k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         enddo!i
 
         if(iof_icm(1)==1) then
           if(Chl_el(k,id)/=Chl_el(k,id)) then
-            write(errmsg,*)'nan found in ICM(2)_chla:',Chl_el(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(2)_chla:',Chl_el(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
         if(iof_icm(3)==1) then
           if(PrmPrdt(k,id)/=PrmPrdt(k,id)) then
-            write(errmsg,*)'nan found in ICM(3):',PrmPrdt(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(3):',PrmPrdt(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
         if(iof_icm(4)==1) then
           if(DIN_el(k,id)/=DIN_el(k,id)) then
-            write(errmsg,*)'nan found in ICM(4):',DIN_el(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(4):',DIN_el(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
         if(iof_icm(5)==1) then
           if(PON_el(k,id)/=PON_el(k,id)) then
-            write(errmsg,*)'nan found in ICM(5):',PON_el(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(5):',PON_el(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
@@ -373,28 +373,28 @@ subroutine link_icm(imode,id,nv)
         if(iof_icm(1)==1) then
           Chl_el(k,id)=Chl_el(nvrt,id)
           if(Chl_el(k,id)/=Chl_el(k,id)) then
-            write(errmsg,*)'nan found in ICM(02)_chla:',Chl_el(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(02)_chla:',Chl_el(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
         if(iof_icm(3)==1) then
           PrmPrdt(k,id)=PrmPrdt(nvrt,id)
           if(PrmPrdt(k,id)/=PrmPrdt(k,id)) then
-            write(errmsg,*)'nan found in ICM(03):',PrmPrdt(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(03):',PrmPrdt(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
         if(iof_icm(4)==1) then
           DIN_el(k,id)=DIN_el(nvrt,id)
           if(DIN_el(k,id)/=DIN_el(k,id)) then
-            write(errmsg,*)'nan found in ICM(04):',DIN_el(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(04):',DIN_el(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
         if(iof_icm(5)==1) then
           PON_el(k,id)=PON_el(nvrt,id)
           if(PON_el(k,id)/=PON_el(k,id)) then
-            write(errmsg,*)'nan found in ICM(05):',PON_el(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(05):',PON_el(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         endif
@@ -406,7 +406,8 @@ subroutine link_icm(imode,id,nv)
           PH_el(k,id)=PH_el(nvrt,id)
           !nan check
           if(PH_el(k,id)/=PH_el(k,id))then
-            write(errmsg,*)'nan found in ICM(2)_ph :',PH_el(k,id),ielg(id),i,k
+            write(errmsg,*)'nan found in ICM(2)_ph
+:',PH_el(k,id),ielg(id),i,k,idry_e(id)
             call parallel_abort(errmsg)
           endif
         enddo !k
@@ -3160,7 +3161,10 @@ subroutine calkwq(id,nv,ure,it)
     endif !k==nv
     COD(k,2)=((1.0+a*dtw2)*COD(k,1)+b*dtw)/(1.0-a*dtw2)
     COD(k,1)=0.5*(COD(k,1)+COD(k,2))
-  
+ 
+!!NN_check
+!write(99,*)'COD at icm.F90: ', id,it,k,COD(k,2),COD(k,1),EROH2S(id),dep(k)
+ 
     !DO
     rKr=0.0
     if(k==1) then
